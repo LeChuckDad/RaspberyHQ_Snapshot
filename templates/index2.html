@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raspberry Pi Kamera</title>
+</head>
+<body>
+    <h1>Kamera Steuerung</h1>
+    <form method="post">
+        <label>Gain:</label>
+        <input name="gain" value="10"><br>
+
+        <label>Belichtungszeit (Sekunden):</label>
+        <input name="belichtung" value="0.2"><br>
+
+        <label>Name:</label>
+        <input name="name" value="default"><br>
+
+        <label>Anzahl:</label>
+        <input name="anzahl" value="1"><br><br>
+
+        <button name="action" value="aufnahme">📸 Aufnahme</button>
+        <button name="action" value="livebild">
+            {% if livebild_aktiv %}🛑 Livebild stoppen{% else %}▶️ Livebild starten{% endif %}
+        </button>
+    </form>
+
+    {% if livebild_aktiv %}
+        <h3>Livebild:</h3>
+        <img src="http://{{ request.host.split(':')[0] }}:8888" width="640">
+    {% endif %}
+</body>
+</html>

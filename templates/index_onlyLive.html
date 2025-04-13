@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Livebild Kamera</title>
+</head>
+<body>
+    <h1>Raspberry Pi HQ Kamera</h1>
+    <button onclick="startStream()">Livebild starten</button>
+    <br><br>
+    <img id="video" style="display:none;" src="">
+
+    <script>
+        function startStream() {
+            const img = document.getElementById('video');
+            img.src = "/video_feed";
+            img.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

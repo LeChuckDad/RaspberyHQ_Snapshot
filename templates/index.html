@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raspberry Pi HQ Kamera</title>
+</head>
+<body>
+    <h1>Raspberry Pi HQ Kamera</h1>
+
+    <button id="toggleButton" onclick="toggleStream()">Livebild starten</button>
+    <br><br>
+    <img id="video" style="display:none;" src="" width="640" height="480">
+
+    <h2>Einzelbild aufnehmen</h2>
+    <form id="captureForm" onsubmit="event.preventDefault(); captureImage();">
+        <label>Gain: <input type="number" id="gain" value="80"></label><br>
+        <label>Belichtungszeit (s): <input type="number" step="0.01" id="exposure" value="0.2"></label><br>
+        <label>Name: <input type="text" id="name" value="Test"></label><br>
+        <label>Anzahl: <input type="number" id="count" value="1"></label><br>
+        <button type="submit">Einzelbild aufnehmen</button>
+    </form>
+
+    <p id="statusMessage"></p>
+
+    <script>
+        let streaming = false;
+
+        async function toggleStream() {
+            const btn = document.getElementById('toggleButton');
+            const img = document.getElementById('video');
+
+            const response = await fetch("/toggle_camera", { method: "POST" });
+            const data = await response.json();
+
+            if (data.running) {
+                img.src = "/video_feed";
+                img.style.display = "block";
+                btn.textContent = "Livebild stoppen";
+                streaming = true;
+            } else {
+                img.src = "";
+                img.style.display = "none";
+                btn.textContent = "Livebild starten";
+                streaming = false;
+            }
+        }
+
+        async function captureImage() {
+            const gain = parseFloat(document.getElementById("gain").value);
+            const exposure = parseFloat(document.getElementById("exposure").value);
+            const name = document.getElementById("name").value;
+            const count = parseInt(document.getElementById("count").value);
+
+            const response = await fetch("/capture_image", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ gain, exposure, name, count })
+            });
+
+            const data = await response.json();
+            document.getElementById("statusMessage").innerText = data.message;
+        }
+    </script>
+</body>
+</html>
