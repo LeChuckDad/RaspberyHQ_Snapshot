@@ -8,6 +8,7 @@ import os
 app = Flask(__name__)
 picam2 = Picamera2()
 video_config = picam2.create_video_configuration(main={"size": (640, 480)})
+
 lock = threading.Lock()
 
 camera_running = False
@@ -87,7 +88,8 @@ def capture_image():
         stop_camera()
 
     # Konfiguration für RAW und JPEG
-    config = picam2.create_still_configuration(main={"size": (640, 480)}, raw={"size": (6112, 3040)})
+    #config = picam2.create_still_configuration(main={"size": (640, 480)}, raw={"size": (6112, 3040)})
+    config = picam2.create_still_configuration(main={"size": (640, 480)}, raw={"size": (6112, 3040), "format": "Bayer"})
     picam2.configure(config)
 
     # Setze die Gain- und Belichtungszeit für die Kamera und deaktiviere Auto-Exposure
@@ -106,11 +108,14 @@ def capture_image():
 
         # Capture RAW und als .raw speichern
         raw_data = picam2.capture_array("raw")
+        jpg_data = picam2.capture_array("jpg")
         raw_data = raw_data.reshape((3040, 6112))  # RAW-Daten auf die richtige Auflösung umwandeln
 
         # RAW-Daten als .raw-Datei speichern
         raw_path = f"captures/{base_name}.raw"
         raw_data.tofile(raw_path)
+        jpg_path = f"captures/{base_name}.jpgw"
+        jpg_data.tofile(jpg_path)
 
         # Umwandlung der RAW-Daten in JPEG mit 640x480 Auflösung
         raw_image = cv2.cvtColor(raw_data, cv2.COLOR_BayerBG2BGR)  # Umwandlung von RAW zu BGR
