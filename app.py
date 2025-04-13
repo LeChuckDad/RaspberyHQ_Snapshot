@@ -88,8 +88,8 @@ def capture_image():
         stop_camera()
 
     # Konfiguration für RAW und JPEG
-    #config = picam2.create_still_configuration(main={"size": (640, 480)}, raw={"size": (6112, 3040)})
-    config = picam2.create_still_configuration(main={"size": (640, 480)}, raw={"size": (6112, 3040), "format": "Bayer"})
+    config = picam2.create_still_configuration(main={"size": (640, 480)}, raw={"size": (6112, 3040)})
+    #config = picam2.create_still_configuration(main={"size": (640, 480)}, raw={"size": (6112, 3040), "format": "Bayer"})
     picam2.configure(config)
 
     # Setze die Gain- und Belichtungszeit für die Kamera und deaktiviere Auto-Exposure
