@@ -9,3 +9,20 @@ There are 4 input fields available with gain exposure time name (image name with
 
 the file is saved in the format date-time-gain-exposure-time-name.raw
 
+
+follwing packages are needed:
+
+# Flask, OpenCV und andere Python-Pakete installieren
+pip install flask opencv-python
+
+# Notwendige System-Tools
+sudo apt-get update
+sudo apt-get install libcamera-tools dcraw
+
+Software configuration for raspberry hq camera:
+"""use the raspberry pi debian "bookworm" version"
+sudo nano /boot/firmware/config.txt
+dtoverlay=imx477 
+
+if you have a different camera chip, replace imx477 with yours. Look here 
+https://www.waveshare.com/wiki/Raspberry_Pi_HQ_Camera
