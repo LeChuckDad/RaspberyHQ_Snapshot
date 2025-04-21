@@ -1,14 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Raspberry Pi HQ Kamera</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 40px;
+        }
+        img {
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            max-width: 100%;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <h1>Raspberry Pi HQ Kamera</h1>
 
-    <button id="toggleButton" onclick="toggleStream()">Livebild starten</button>
-    <br><br>
-    <img id="video" style="display:none;" src="" width="640" height="480">
+    <button id="liveBtn" onclick="toggleLive()">Live</button>
+
+    <div>
+        <img id="liveStream" style="display:none;" width="640" height="480" alt="Live Stream">
+    </div>
+
+    <div>
+        <h2 id="snapshotTitle" style="display:none;">Letztes Bild:</h2>
+        <img id="snapshot" src="" style="display:none;" alt="Letztes gespeichertes Bild">
+    </div>
+
+    <script>
+        let liveOn = false;
+
+        async function toggleLive() {
+            const liveImg = document.getElementById('liveStream');
+            const snapImg = document.getElementById('snapshot');
+            const snapTitle = document.getElementById('snapshotTitle');
+            const btn = document.getElementById('liveBtn');
+
+            if (!liveOn) {
+                liveImg.src = "/start_video_feed?" + new Date().getTime();
+                liveImg.style.display = 'block';
+                snapImg.style.display = 'none';
+                snapTitle.style.display = 'none';
+                btn.textContent = "Stop";
+                liveOn = true;
+            } else {
+                await fetch("/stop_video_feed", { method: "POST" });
+                liveImg.src = "";
+                liveImg.style.display = 'none';
+                btn.textContent = "Live";
+
+                snapImg.src = "/latest_image?" + new Date().getTime();
+                snapImg.style.display = 'block';
+                snapTitle.style.display = 'block';
+                liveOn = false;
+            }
+        }
+    </script>
 
     <h2>Einzelbild aufnehmen</h2>
     <form id="captureForm" onsubmit="event.preventDefault(); captureImage();">
@@ -22,28 +77,6 @@
     <p id="statusMessage"></p>
 
     <script>
-        let streaming = false;
-
-        async function toggleStream() {
-            const btn = document.getElementById('toggleButton');
-            const img = document.getElementById('video');
-
-            const response = await fetch("/toggle_camera", { method: "POST" });
-            const data = await response.json();
-
-            if (data.running) {
-                img.src = "/video_feed";
-                img.style.display = "block";
-                btn.textContent = "Livebild stoppen";
-                streaming = true;
-            } else {
-                img.src = "";
-                img.style.display = "none";
-                btn.textContent = "Livebild starten";
-                streaming = false;
-            }
-        }
-
         async function captureImage() {
             const gain = parseFloat(document.getElementById("gain").value);
             const exposure = parseFloat(document.getElementById("exposure").value);
