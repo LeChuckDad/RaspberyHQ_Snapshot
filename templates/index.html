@@ -19,6 +19,10 @@
             font-size: 16px;
             cursor: pointer;
         }
+        #statusMessage {
+            margin-top: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -35,9 +39,21 @@
         <img id="snapshot" src="" style="display:none;" alt="Letztes gespeichertes Bild">
     </div>
 
+    <h2>Einzel-/Mehrfachaufnahme</h2>
+    <form id="captureForm" onsubmit="event.preventDefault(); captureImage();">
+        <label>Gain: <input type="number" id="gain" value="80"></label><br>
+        <label>Belichtungszeit (s): <input type="number" step="0.01" id="exposure" value="0.2"></label><br>
+        <label>Name: <input type="text" id="name" value="Test"></label><br>
+        <label>Anzahl: <input type="number" id="count" value="1" min="1"></label><br>
+        <button type="submit" id="captureBtn">Bilder aufnehmen</button>
+    </form>
+
+    <p id="statusMessage"></p>
+
     <script>
         let liveOn = false;
 
+        /* Livebild starten / stoppen unverändert */
         async function toggleLive() {
             const liveImg = document.getElementById('liveStream');
             const snapImg = document.getElementById('snapshot');
@@ -56,41 +72,46 @@
                 liveImg.src = "";
                 liveImg.style.display = 'none';
                 btn.textContent = "Live";
-
                 snapImg.src = "/latest_image?" + new Date().getTime();
                 snapImg.style.display = 'block';
                 snapTitle.style.display = 'block';
                 liveOn = false;
             }
         }
-    </script>
 
-    <h2>Einzelbild aufnehmen</h2>
-    <form id="captureForm" onsubmit="event.preventDefault(); captureImage();">
-        <label>Gain: <input type="number" id="gain" value="80"></label><br>
-        <label>Belichtungszeit (s): <input type="number" step="0.01" id="exposure" value="0.2"></label><br>
-        <label>Name: <input type="text" id="name" value="Test"></label><br>
-        <label>Anzahl: <input type="number" id="count" value="1"></label><br>
-        <button type="submit">Einzelbild aufnehmen</button>
-    </form>
-
-    <p id="statusMessage"></p>
-
-    <script>
+        /* Aufnahme-Funktion mit Fortschrittsanzeige */
         async function captureImage() {
-            const gain = parseFloat(document.getElementById("gain").value);
+            const gain     = parseFloat(document.getElementById("gain").value);
             const exposure = parseFloat(document.getElementById("exposure").value);
-            const name = document.getElementById("name").value;
-            const count = parseInt(document.getElementById("count").value);
+            const name     = document.getElementById("name").value;
+            const total    = parseInt(document.getElementById("count").value, 10);
+            const statusEl = document.getElementById("statusMessage");
+            const btn      = document.getElementById("captureBtn");
 
-            const response = await fetch("/capture_image", {
-                method: "POST",
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ gain, exposure, name, count })
-            });
+            // UI vorbereiten
+            let captured = 0;
+            statusEl.textContent = `0 / ${total} Bilder aufgenommen`;
+            btn.disabled = true;
 
-            const data = await response.json();
-            document.getElementById("statusMessage").innerText = data.message;
+            // Nacheinander einzelne Aufnahmen ausführen
+            for (let i = 1; i <= total; i++) {
+                try {
+                    const resp = await fetch("/capture_image", {
+                        method: "POST",
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ gain, exposure, name, count: 1 })
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok) throw new Error(data.message || "Fehler");
+                    captured++;
+                    statusEl.textContent = `${captured} / ${total} Bilder aufgenommen`;
+                } catch (err) {
+                    statusEl.textContent = `Fehler bei Bild ${i}: ${err.message}`;
+                    break;
+                }
+            }
+
+            btn.disabled = false;
         }
     </script>
 </body>
