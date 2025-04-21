@@ -24,5 +24,10 @@ Software configuration for raspberry hq camera:
 sudo nano /boot/firmware/config.txt
 dtoverlay=imx477 
 
+#Start RaspberryGQ Snapshot
+python app.py
+after starting you see the server adress: Running on http://192.168.178.53:5000
+
+
 if you have a different camera chip, replace imx477 with yours. Look here 
 https://www.waveshare.com/wiki/Raspberry_Pi_HQ_Camera
